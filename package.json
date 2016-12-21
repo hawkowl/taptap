@@ -6,8 +6,8 @@
     "license": "MIT",
     "private": true,
     "scripts": {
-        "postinstall": "bower install && virtualenv -p python3 --clear venv && venv/bin/pip install -r requirements.txt",
-        "prestart": "venv/bin/pip install .",
-        "start": "venv/bin/twist -m"
+        "postinstall": "bower install && virtualenv -p python3 --clear venv",
+        "prestart": "venv/bin/pip install -U .",
+        "start": "venv/bin/twist taptap --endpoint=tcp:8080"
     }
 }
