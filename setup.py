@@ -21,7 +21,7 @@ if __name__ == "__main__":
         ],
         use_incremental=True,
         setup_requires=['incremental'],
-        install_requires=['incremental', 'twisted'],
+        install_requires=['incremental', 'twisted', 'klein'],
         package_dir={"": "src"},
         packages=find_packages('src') + ["twisted.plugins"],
         package_data={

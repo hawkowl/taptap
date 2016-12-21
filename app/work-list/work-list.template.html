@@ -1,0 +1,18 @@
+<p>
+  Search:
+  <input ng-model="$ctrl.query" />
+</p>
+
+
+<p>
+  Sort by:
+  <select ng-model="$ctrl.orderProp">
+    <option value="name">Alphabetical</option>
+  </select>
+</p>
+
+<ul>
+  <li ng-repeat="work in $ctrl.works | filter:$ctrl.query | orderBy:$ctrl.orderProp">
+    {{work.id}}
+  </li>
+</ul>
