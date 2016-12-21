@@ -1,0 +1,17 @@
+{
+    "name": "taptapstats",
+    "description": "Personal writing statistics.",
+    "version": "0.0.0",
+    "homepage": "https://github.com/angular/taptapstats",
+    "license": "MIT",
+    "private": true,
+    "dependencies": {
+        "angular": "1.6.x",
+        "angular-animate": "1.6.x",
+        "angular-mocks": "1.6.x",
+        "angular-resource": "1.6.x",
+        "angular-route": "1.6.x",
+        "bootstrap": "v4.0.x",
+        "jquery": "3.1.x"
+    }
+}
