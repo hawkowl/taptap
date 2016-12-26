@@ -12,7 +12,10 @@
 </p>
 
 <ul>
+  {{ $ctrl.works|json }}
   <li ng-repeat="work in $ctrl.works | filter:$ctrl.query | orderBy:$ctrl.orderProp">
-    {{work.id}}
+    <a href="#!/works/{{ work.id }}">
+      {{work.id}}
+    </a>
   </li>
 </ul>

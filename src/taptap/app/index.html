@@ -4,8 +4,7 @@
     <meta charset="utf-8">
     <title>TapTap</title>
     <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" />
-    <link rel="stylesheet" href="app.css" />
-    <link rel="stylesheet" href="app.animations.css" />
+    <link rel="stylesheet" href="css/reset.css" />
 
     <script src="bower_components/jquery/dist/jquery.js"></script>
     <script src="bower_components/angular/angular.js"></script>
@@ -19,8 +18,36 @@
     <script src="core/work/work.service.js"></script>
     <script src="work-list/work-list.module.js"></script>
     <script src="work-list/work-list.component.js"></script>
+    <script src="work-detail/work-detail.module.js"></script>
+    <script src="work-detail/work-detail.component.js"></script>
+    <script src="new-work/new-work.module.js"></script>
+    <script src="new-work/new-work.component.js"></script>
   </head>
   <body>
+
+
+    <div class="stripe">
+    </div>
+
+
+    <div class="container-fluid nav-top">
+      <div class="container">
+        <nav class="navbar navbar-dark bg-inverse header">
+          <div class="nav navbar-ban pull-xs-left crop">
+            <img class="navbar-brand logo-height" src="/img/logo.svg">
+          </div>
+
+          <ul class="nav navbar-nav pull-xs-right">
+
+            <li class="nav-item">
+              <a class="nav-link" href="#">Login</a>
+            </li>
+
+          </ul>
+
+        </nav>
+      </div>
+    </div>
 
     <div class="view-container">
       <div ng-view class="view-frame"></div>

@@ -10,7 +10,10 @@ angular.
         when('/works', {
           template: '<work-list></work-list>'
         }).
-        when('/works/:workId', {
+        when('/works/new', {
+          template: '<new-work></new-work>'
+        }).
+        when('/works/:workID', {
           template: '<work-detail></work-detail>'
         }).
         otherwise('/works');

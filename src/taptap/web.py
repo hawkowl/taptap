@@ -3,6 +3,8 @@ from twisted.web.static import File
 
 from klein import Klein
 
+from .work import load_works, dump_works
+
 class APIResource(object):
 
     app = Klein()
@@ -12,7 +14,16 @@ class APIResource(object):
 
         request.responseHeaders.addRawHeader("Content-Type", "application/json")
 
-        return b'[{"id": 1}, {"id": 2}]'
+        works = load_works()
+        return dump_works(list(works.values()))
+
+    @app.route('/works/<int:id>')
+    def works_item(self, request, id):
+
+        request.responseHeaders.addRawHeader("Content-Type", "application/json")
+
+        works = load_works()
+        return dump_works(works[id])
 
 
 
@@ -27,5 +38,8 @@ class CoreResource(File):
 
         if request.path[:5] == b"/api/":
             return self._api
+
+        if request.path[:6] == b"/sass/":
+            return None
 
         return super(CoreResource, self).getChild(path, request)

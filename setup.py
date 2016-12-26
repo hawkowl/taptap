@@ -20,8 +20,17 @@ if __name__ == "__main__":
             "Programming Language :: Python :: 3.5",
         ],
         use_incremental=True,
-        setup_requires=['incremental'],
-        install_requires=['incremental', 'twisted', 'klein'],
+        setup_requires=['incremental', 'libsass'],
+        install_requires=[
+            'incremental',
+            'twisted',
+            'klein',
+            'attrs',
+            'cattrs',
+        ],
+        sass_manifests={
+            'taptap': ('app/sass', 'app/css', '/css')
+        },
         package_dir={"": "src"},
         packages=find_packages('src') + ["twisted.plugins"],
         package_data={

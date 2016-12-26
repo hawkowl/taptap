@@ -2,5 +2,7 @@ angular.module('taptapApp', [
     'core',
 
     'ngRoute',
-    'workList'
+    'workList',
+    'workDetail',
+    'newWork'
 ]);
