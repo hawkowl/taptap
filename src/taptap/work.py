@@ -45,6 +45,7 @@ def load_works():
     x = {}
 
     for y in loaded:
+        y.counts.sort(key=lambda x: x.at)
         x[y.id] = y
 
     return x

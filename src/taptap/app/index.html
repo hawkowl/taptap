@@ -4,9 +4,10 @@
     <meta charset="utf-8">
     <title>TapTap</title>
     <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" />
-    <link rel="stylesheet" href="css/reset.css" />
+    <link rel="stylesheet" href="css/main.sass.css" />
 
     <script src="bower_components/jquery/dist/jquery.js"></script>
+    <script src="bower_components/jquery.sparkline/index.js"></script>
     <script src="bower_components/angular/angular.js"></script>
     <script src="bower_components/angular-animate/angular-animate.js"></script>
     <script src="bower_components/angular-resource/angular-resource.js"></script>
@@ -29,18 +30,15 @@
     <div class="stripe">
     </div>
 
-
-    <div class="container-fluid nav-top">
+    <div class="container-fluid nav-top blackbg">
       <div class="container">
-        <nav class="navbar navbar-dark bg-inverse header">
-          <div class="nav navbar-ban pull-xs-left crop">
-            <img class="navbar-brand logo-height" src="/img/logo.svg">
-          </div>
+        <nav class="navbar navbar-dark bg-inverse siteheader">
+          <a class="navbar-brand" href="#">TapTap</a>
 
-          <ul class="nav navbar-nav pull-xs-right">
+          <ul class="nav navbar-nav float-xs-right">
 
             <li class="nav-item">
-              <a class="nav-link" href="#">Login</a>
+              <a class="nav-link" href="#">🔐 Login</a>
             </li>
 
           </ul>
@@ -49,8 +47,12 @@
       </div>
     </div>
 
-    <div class="view-container">
-      <div ng-view class="view-frame"></div>
+    <div class="container content-container">
+      <div class="col-sm-12">
+        <div class="view-container">
+          <div ng-view class="view-frame"></div>
+        </div>
+      </div>
     </div>
 
   </body>

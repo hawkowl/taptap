@@ -1,21 +1,44 @@
-<p>
-  Search:
-  <input ng-model="$ctrl.query" />
-</p>
 
+<div class="container-fluid">
 
-<p>
-  Sort by:
-  <select ng-model="$ctrl.orderProp">
-    <option value="name">Alphabetical</option>
-  </select>
-</p>
+  <div class="col-sm-6">
+    <p>
+      Search:
+      <input ng-model="$ctrl.query.name" />
+    </p>
+  </div>
+  <div class="col-sm-6">
+    <p>
+      Sort by:
+      <select ng-model="$ctrl.orderProp">
+        <option value="name">Alphabetical</option>
+        <option value="-name">Alphabetical (Reverse)</option>
+      </select>
+    </p>
 
-<ul>
-  {{ $ctrl.works|json }}
-  <li ng-repeat="work in $ctrl.works | filter:$ctrl.query | orderBy:$ctrl.orderProp">
-    <a href="#!/works/{{ work.id }}">
-      {{work.id}}
-    </a>
-  </li>
+  </div>
+</div>
+
+<div class="container-fluid">
+
+  <div class="row" ng-repeat="work in $ctrl.works | filter:$ctrl.query | orderBy:$ctrl.orderProp">
+    <div class="col-sm-6">
+      <a href="#!/works/{{ work.id }}">
+      {{work.name}}
+      </a>
+    </div>
+    <div class="col-sm-3">
+      Word Count: {{ work.word_count }}
+    </div>
+    <div class="col-sm-3">
+      <span class="sparklines" values="{{ $ctrl.sparkline(work) }}">
+
+      </span>
+
+    </div>
+  </div>
 </ul>
+
+<span ng-show="{{ $ctrl.showsparklines() }}"></span>
+
+</div>
