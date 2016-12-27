@@ -55,6 +55,20 @@ class APIResource(object):
     def __init__(self, cookie_store):
         self._cookies = cookie_store
 
+    @app.route('/user')
+    def user(self, request):
+
+        request.responseHeaders.addRawHeader("Content-Type", "application/json")
+
+        d = User.load(self._cookies[request.getCookie(b"TAPTAP_TOKEN")])
+
+        @d.addCallback
+        def _(user):
+            return json.dumps({"name": user.name}).encode('utf8')
+
+        return d
+
+
     @app.route('/works/')
     def works_root(self, request):
 
@@ -181,10 +195,7 @@ class CoreResource(File):
     def getChild(self, path, request):
 
         # ~auth check~
-
-
-        if request.path[:7] != b"/login/" and request.path[:5] != b"/css/" and request.path[:5] != b"/js/" and request.path[:16] != b"/bower_components/":
-
+        if request.path[:7] != b"/login/" and request.path[:5] != b"/css/" and request.path[:4] != b"/js/":
             cookie = request.getCookie(b"TAPTAP_TOKEN")
 
             if not cookie or cookie not in self._cookies:

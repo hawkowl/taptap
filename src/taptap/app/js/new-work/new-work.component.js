@@ -3,7 +3,7 @@
 angular.
   module('newWork').
     component('newWork', {
-        templateUrl: 'new-work/new-work.template.html',
+        templateUrl: '/js/new-work/new-work.template.html',
         controller: [
             'Works', "$scope", "$location",
             function NewWorkController(Works, $scope, $location) {

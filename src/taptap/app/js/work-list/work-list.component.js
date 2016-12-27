@@ -3,7 +3,7 @@
 angular.
     module('workList').
     component('workList', {
-        templateUrl: 'work-list/work-list.template.html',
+        templateUrl: '/js/work-list/work-list.template.html',
         controller: [
             'Works',
             function WorkListController(Works) {

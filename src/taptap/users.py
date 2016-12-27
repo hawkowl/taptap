@@ -33,13 +33,13 @@ class User(object):
 
             f = await engine.execute(user_table.select().
                                      where(user_table.c.id == id))
-            result = f.fetchone()
+            result = await f.fetchone()
 
             return cls(
                 id=result[user_table.c.id],
                 name=result[user_table.c.name])
 
-
+        return ensureDeferred(_())
 
     def save(self, engine=None):
 
@@ -53,7 +53,6 @@ class User(object):
                     id=self.id,
                     name=self.name))
             except Exception as e:
-                print(e)
                 await engine.execute(user_table.update().
                                      where(user_table.c.id == self.id).
                                      values(name=self.name))
