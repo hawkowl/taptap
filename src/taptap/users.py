@@ -13,7 +13,7 @@ from urllib.parse import urlencode, quote as _quote, unquote, parse_qs
 
 from twisted.internet.defer import ensureDeferred
 
-from ._db import get_engine, user_table
+from ._db import get_engine, user_table, cookie_table, work_table
 
 quote = lambda x: _quote(x, safe='')
 
@@ -59,8 +59,78 @@ class User(object):
 
             return self
 
+        return ensureDeferred(_())
+
+    def load_works(self, engine=None):
+
+        from .work import Work
+
+        if not engine:
+            engine = get_engine()
+
+        async def _():
+
+            r = await engine.execute(work_table.select().where(work_table.c.user == self.id))
+
+            results = await r.fetchall()
+
+            done_results = []
+
+            for result in results:
+                done_results.append(await Work._load_from_data(result, engine))
+
+            return done_results
 
         return ensureDeferred(_())
+
+
+
+
+def add_cookie(cookie, id, time_to_expiry, engine=None):
+
+    if not engine:
+        engine = get_engine()
+
+    async def _():
+        e = await engine.connect()
+
+        f = await e.execute(cookie_table.insert().values(
+            cookie=cookie,
+            id=id,
+            expires=time.time() + time_to_expiry
+        ))
+
+        await e.close()
+
+        return f
+
+    return ensureDeferred(_())
+
+
+def get_cookies(engine=None):
+
+    if not engine:
+        engine = get_engine()
+
+    async def _():
+
+        e = await engine.connect()
+
+        await e.execute(cookie_table.delete().where(cookie_table.c.expires < time.time()))
+
+        f = await e.execute(cookie_table.select())
+
+        cookies = await f.fetchall()
+        cookiedict = {}
+
+        for cookie in cookies:
+            cookiedict[cookie.cookie] = cookie.id
+
+        await e.close()
+        return cookiedict
+
+    return ensureDeferred(_())
+
 
 
 def get_nonce():

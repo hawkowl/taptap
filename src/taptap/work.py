@@ -3,24 +3,134 @@ import cattr
 import json
 
 from typing import List
-from attr.validators import instance_of
+from attr.validators import instance_of, optional
 
 
 from twisted.python.filepath import FilePath
+from twisted.internet.defer import ensureDeferred
 
+from ._db import get_engine, counts_table, work_table
 
 @attr.s
 class WordCount(object):
     at = attr.ib(validator=instance_of(int))
     count = attr.ib(validator=instance_of(int))
 
+    def save_for(self, id, engine=None):
+
+        if not engine:
+            engine = get_engine()
+
+        async def _():
+
+            values = {
+                "at": self.at,
+                "count": self.count,
+                "work": id
+            }
+
+            try:
+                engine.execute(counts_table.insert().values(**values))
+            except:
+                pass
+
+            return self
+
+        return ensureDeferred(_())
+
+    @classmethod
+    def load_for(cls, for_id, engine=None):
+
+        if not engine:
+            engine = get_engine()
+
+        async def _():
+
+            f = await engine.execute(counts_table.select().
+                                     where(counts_table.c.work == for_id))
+            result = await f.fetchall()
+
+            results = []
+
+            for count in result:
+                results.append(cls(
+                    at=count[counts_table.c.at],
+                    count=count[counts_table.c.count]))
+
+            return results
+
+        return ensureDeferred(_())
+
 @attr.s
 class Work(object):
-    id = attr.ib(validator=instance_of(int))
+    user = attr.ib(validator=instance_of(int))
     name = attr.ib(validator=instance_of(str))
     counts = attr.ib(validator=instance_of(List[WordCount]))
     word_target = attr.ib(validator=instance_of(int))
     completed = attr.ib(validator=instance_of(bool), default=False)
+    id = attr.ib(validator=optional(instance_of(int)), default=None)
+
+    @classmethod
+    async def _load_from_data(cls, data, engine):
+
+        counts = await WordCount.load_for(data[work_table.c.id],
+                                          engine=engine)
+
+        return cls(
+            id=data[work_table.c.id],
+            name=data[work_table.c.name],
+            user=data[work_table.c.user],
+            word_target=data[work_table.c.word_target],
+            completed=data[work_table.c.completed],
+            counts=counts,
+        )
+
+    @classmethod
+    def load(cls, id, engine=None):
+
+        if not engine:
+            engine = get_engine()
+
+        async def _():
+
+            f = await engine.execute(work_table.select().
+                                     where(work_table.c.id == id))
+            result = await f.fetchone()
+
+            return self._load_from_data(result, engine)
+
+        return ensureDeferred(_())
+
+    def save(self, engine=None):
+
+        if not engine:
+            engine = get_engine()
+
+        async def _():
+
+            values = {
+                "name": self.name,
+                "word_target": self.word_target,
+                "completed": self.completed,
+                "user": self.user,
+            }
+
+            if self.id:
+                values["id"] = self.id
+                await engine.execute(work_table.update().
+                                     where(work_table.c.id == self.id).
+                                     values(**values))
+
+            else:
+                res = await engine.execute(work_table.insert().values(**values))
+                self.id = res.inserted_primary_key[0]
+
+            for count in self.counts:
+                await count.save_for(self.id)
+
+            return self
+
+        return ensureDeferred(_())
 
 
 def dump_works(works):

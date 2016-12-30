@@ -27,6 +27,8 @@ if __name__ == "__main__":
             'klein',
             'attrs',
             'cattrs',
+            'treq',
+            'alchimia',
         ],
         sass_manifests={
             'taptap': ('app/sass', 'app/css', '/css')

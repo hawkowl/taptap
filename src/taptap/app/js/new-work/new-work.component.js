@@ -8,7 +8,14 @@ angular.
             'Works', "$scope", "$location",
             function NewWorkController(Works, $scope, $location) {
                 $scope.update = function(work) {
-                    $location.path("#!/works/" + 1)
+
+                    Works.add(work).$promise.then(function (res) {
+
+                        console.log(res)
+
+                        $location.path("#!/works/" + res.id)
+
+                    });
                 }
             }
         ]

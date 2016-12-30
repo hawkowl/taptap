@@ -2,13 +2,15 @@ import attr
 import cattr
 import json
 import os
+import time
+import math
 
 from base64 import b64encode
 
 from urllib.parse import urlparse, urlunparse
 
 from typing import List
-from attr.validators import instance_of
+from attr.validators import instance_of, optional
 
 from twisted.web.resource import Resource
 from twisted.web.static import File
@@ -17,18 +19,19 @@ from twisted.python.filepath import FilePath
 
 from klein import Klein
 
-from .work import load_works, dump_works, WordCount
-from .users import get_request_token, get_access_token, get_user_details, User
+from .work import load_works, dump_works, WordCount, Work
+from .users import get_request_token, get_access_token, get_user_details, User, add_cookie, get_cookies
 
 
 @attr.s
 class APIWork(object):
-    id = attr.ib(validator=instance_of(int))
     name = attr.ib(validator=instance_of(str))
-    counts = attr.ib(validator=instance_of(List[WordCount]))
-    word_count = attr.ib(validator=instance_of(int))
     word_target = attr.ib(validator=instance_of(int))
     completed = attr.ib(validator=instance_of(bool), default=False)
+
+    id = attr.ib(validator=optional(instance_of(int)), default=None)
+    counts = attr.ib(validator=optional(instance_of(List[WordCount])), default=None)
+    word_count = attr.ib(validator=optional(instance_of(int)), default=None)
 
     @classmethod
     def from_work(cls, work):
@@ -41,6 +44,17 @@ class APIWork(object):
                    word_count=word_count,
                    word_target=work.word_target,
                    completed=work.completed)
+
+    def to_new_work(self, user):
+
+        counts = [WordCount(at=math.floor(time.time()), count=0)]
+
+        return Work(
+            name=self.name,
+            counts=counts,
+            word_target=self.word_target,
+            completed=self.completed,
+            user=user)
 
 
 def _make_cookie_key():
@@ -57,8 +71,8 @@ class APIResource(object):
     def __init__(self, cookie_store):
         self._cookies = cookie_store
 
-    @app.route('/user')
-    def user(self, request):
+    @app.route('/user', methods=['GET'])
+    def user_GET(self, request):
 
         request.responseHeaders.addRawHeader("Content-Type", "application/json")
 
@@ -71,17 +85,41 @@ class APIResource(object):
         return d
 
 
-    @app.route('/works/')
-    def works_root(self, request):
+    @app.route('/works/', methods=["GET"])
+    def works_root_GET(self, request):
 
         request.responseHeaders.addRawHeader("Content-Type", "application/json")
 
-        works = [APIWork.from_work(x) for x in load_works().values()]
-        works.sort(key=lambda x: x.id)
-        return _make_json(works)
+        d = User.load(self._cookies[request.getCookie(b"TAPTAP_TOKEN")])
 
-    @app.route('/works/<int:id>')
-    def works_item(self, request, id):
+        d.addCallback(lambda user: user.load_works())
+
+        @d.addCallback
+        def _(works):
+
+            works = [APIWork.from_work(x) for x in works]
+            works.sort(key=lambda x: x.id)
+            return _make_json(works)
+
+        return d
+
+    @app.route('/works/', methods=["POST"])
+    def works_root_POST(self, request):
+
+        request.responseHeaders.addRawHeader("Content-Type", "application/json")
+
+        work_in = cattr.loads(json.loads(request.content.getvalue().decode('utf8')), APIWork)
+
+        work = work_in.to_new_work(self._cookies[request.getCookie(b"TAPTAP_TOKEN")])
+        d = work.save()
+
+        d.addCallback(lambda _: _make_json(APIWork.from_work(_)))
+
+        return d
+
+
+    @app.route('/works/<int:id>', methods=["GET"])
+    def works_item_GET(self, request, id):
 
         request.responseHeaders.addRawHeader("Content-Type", "application/json")
 
@@ -164,7 +202,17 @@ class LoginResource(object):
                 port = ":" + str(request.getHost().port)
 
             key = _make_cookie_key()
-            self._cookies[key] = resp.id
+
+            d = add_cookie(key, resp.id, 25200)
+            d.addCallback(lambda _: get_cookies())
+            d.addCallback(_cookie_done, key)
+
+            return d
+
+        def _cookie_done(cookies, key):
+            self._cookies.clear()
+            self._cookies.update(cookies)
+
             request.addCookie("TAPTAP_TOKEN", key,
                               path="/",
                               max_age=25200, httpOnly=True)
@@ -190,15 +238,25 @@ class CoreResource(File):
     def __init__(self, *args, **kwargs):
 
         super().__init__(*args, **kwargs)
+
         self._cookies = {}
         self._api = APIResource(self._cookies).app.resource()
         self._login = LoginResource(self._cookies).app.resource()
+
+        d = get_cookies()
+
+        @d.addCallback
+        def _(cookies):
+            self._cookies.clear()
+            self._cookies.update(cookies)
 
     def getChild(self, path, request):
 
         # ~auth check~
         if request.path[:7] != b"/login/" and request.path[:5] != b"/css/" and request.path[:4] != b"/js/":
             cookie = request.getCookie(b"TAPTAP_TOKEN")
+
+            print(cookie, self._cookies)
 
             if not cookie or cookie not in self._cookies:
                 return LoginRedirectResource()
