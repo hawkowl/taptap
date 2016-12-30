@@ -19,6 +19,7 @@ class Work(object):
     id = attr.ib(validator=instance_of(int))
     name = attr.ib(validator=instance_of(str))
     counts = attr.ib(validator=instance_of(List[WordCount]))
+    word_target = attr.ib(validator=instance_of(int))
     completed = attr.ib(validator=instance_of(bool), default=False)
 
 

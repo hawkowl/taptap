@@ -27,6 +27,7 @@ class APIWork(object):
     name = attr.ib(validator=instance_of(str))
     counts = attr.ib(validator=instance_of(List[WordCount]))
     word_count = attr.ib(validator=instance_of(int))
+    word_target = attr.ib(validator=instance_of(int))
     completed = attr.ib(validator=instance_of(bool), default=False)
 
     @classmethod
@@ -38,6 +39,7 @@ class APIWork(object):
                    name=work.name,
                    counts=work.counts,
                    word_count=word_count,
+                   word_target=work.word_target,
                    completed=work.completed)
 
 

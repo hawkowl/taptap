@@ -1,44 +1,45 @@
 
-<div class="container-fluid">
+<div class="container-fluid work-list-filters">
 
-  <div class="col-sm-6">
-    <p>
-      Search:
+  <div class="row">
+  <div class="col-sm-6 filters">
+    <span>
+      Search: &nbsp;
       <input ng-model="$ctrl.query.name" />
-    </p>
-  </div>
-  <div class="col-sm-6">
-    <p>
-      Sort by:
+    </span>
+    <span>
+      Sort by: &nbsp;
       <select ng-model="$ctrl.orderProp">
         <option value="name">Alphabetical</option>
         <option value="-name">Alphabetical (Reverse)</option>
       </select>
-    </p>
-
+    </span>
+  </div>
+  <div class="col-sm-6 add-button">
+    <div>
+      <a href="#!/works/new">+ Add</a>
+    </div>
+  </div>
   </div>
 </div>
 
-<div class="container-fluid">
+<div class="container-fluid work-list">
 
   <div class="row" ng-repeat="work in $ctrl.works | filter:$ctrl.query | orderBy:$ctrl.orderProp">
-    <div class="col-sm-6">
-      <a href="#!/works/{{ work.id }}">
-      {{work.name}}
-      </a>
+    <div class="col-sm-6 work-name">
+      <a href="#!/works/{{ work.id }}">{{work.name}}</a>
+      <small>({{ $ctrl.is_done(work) }})</small>
     </div>
-    <div class="col-sm-3">
-      Word Count: {{ work.word_count }}
-    </div>
-    <div class="col-sm-3">
-      <span class="sparklines" values="{{ $ctrl.sparkline(work) }}">
-
-      </span>
+    <div class="col-sm-6 word-count">
+      <div class="word-count-number">{{ work.word_count }}/{{ work.word_target }} words ({{ $ctrl.words_to_time(work.word_count) }})</div>
+      <div class="sparklines" id="sparkline-{{ work.id }}" values="{{ $ctrl.sparkline(work) }}"></div>
 
     </div>
+
+    <span ng-show="{{ $ctrl.showsparklines(work) }}"></span>
   </div>
+
 </ul>
 
-<span ng-show="{{ $ctrl.showsparklines() }}"></span>
 
 </div>
