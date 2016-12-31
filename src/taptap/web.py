@@ -123,8 +123,11 @@ class APIResource(object):
 
         request.responseHeaders.addRawHeader("Content-Type", "application/json")
 
-        works = load_works()
-        return _make_json(APIWork.from_work(works[id]))
+        d = User.load(self._cookies[request.getCookie(b"TAPTAP_TOKEN")])
+        d.addCallback(lambda user: user.load_work(id))
+        d.addCallback(lambda _: _make_json(APIWork.from_work(_)))
+        return d
+
 
 
 class LoginResource(object):

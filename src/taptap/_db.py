@@ -18,7 +18,7 @@ def get_engine():
     global _engine
     if _engine is None:
         _engine = create_engine(
-            "sqlite:///taptap.db", reactor=reactor, strategy=TWISTED_STRATEGY
+            "postgresql+psycopg2://taptap@localhost/taptap", reactor=reactor, strategy=TWISTED_STRATEGY,
         )
 
     return _engine
