@@ -13,6 +13,7 @@
         "angular-route": "1.6.x",
         "bootstrap": "v4.0.x",
         "jquery": "3.1.x",
-        "jquery.sparkline": "http://omnipotent.net/jquery.sparkline/2.1.2/jquery.sparkline.js"
+        "jquery.sparkline": "http://omnipotent.net/jquery.sparkline/2.1.2/jquery.sparkline.js",
+        "Countable": "2.1.x"
     }
 }

@@ -5,10 +5,17 @@ angular.
     component('workDetail', {
         templateUrl: '/js/work-detail/work-detail.template.html',
         controller: [
-            'Work', '$routeParams',
-            function WorkDetailController(Work, $routeParams) {
-                var self = this;
-                self.work = Work.get({workID: $routeParams.workID})
+            'Work', 'WordCount', '$scope', '$routeParams',
+            function WorkDetailController(Work, WordCount, $scope, $routeParams) {
+                $scope.work = Work.get({workID: $routeParams.workID})
+                $scope.wordcount = {}
+
+                $scope.update = function() {
+                    var input = {"count": $("#wc_number").val()};
+                    WordCount.add({workID: $routeParams.workID}, input).$promise.then(
+                        function(work) {$scope.work = work})
+                }
+
             }
         ]
     });

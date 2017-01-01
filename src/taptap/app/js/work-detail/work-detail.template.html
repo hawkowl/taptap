@@ -1,1 +1,65 @@
-<p>{{ $ctrl.work.id }}</p>
+<div class="container-fluid work-detail">
+
+  <div class="row">
+    <div class="col-sm-6">
+      <h1>{{ work.name }}</h1>
+    </div>
+    <div class="col-sm-6" class="word-counts">
+      <div>
+        <button type="button" class="btn btn-primary btn-sml" data-toggle="modal" data-target="#wordcount_modal">
+          Update Count
+        </button>
+      </div>
+      <div>
+        {{ work.word_count }}/{{ work.word_target }} words ({{ work.word_count | words_to_time }})
+      </div>
+    </div>
+  </div>
+
+
+
+
+  <form novalidate>
+  <!-- Modal -->
+    <div class="modal fade" id="wordcount_modal" tabindex="-1" role="dialog" aria-labelledby="wcModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+            <h4 class="modal-title" id="wcModalLabel">Update your word count</h4>
+          </div>
+          <div class="modal-body">
+            <div>
+              <textarea id="wc_input"></textarea>
+            </div>
+            <div>
+              <label>Words: <input type="number" id="wc_number" value="{{ work.word_count }}"></label>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <input type="submit" class="btn btn-primary" ng-click="update()" value="Save">
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+
+
+  <script>
+    $('#wordcount_modal').on('shown.bs.modal', function () {
+      $('#wc_input').val("");
+      $('#wc_input').focus();
+    });
+
+    Countable.live($('#wc_input').get(0), function(counter) {
+      console.log(counter);
+      $('#wc_number').val(counter.words);
+    });
+
+  </script>
+
+
+</div>

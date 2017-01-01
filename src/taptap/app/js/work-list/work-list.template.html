@@ -31,7 +31,7 @@
       <small>({{ $ctrl.is_done(work) }})</small>
     </div>
     <div class="col-sm-6 word-count">
-      <div class="word-count-number">{{ work.word_count }}/{{ work.word_target }} words ({{ $ctrl.words_to_time(work.word_count) }})</div>
+      <div class="word-count-number">{{ work.word_count }}/{{ work.word_target }} words ({{ work.word_count | words_to_time }})</div>
       <div class="sparklines" id="sparkline-{{ work.id }}" values="{{ $ctrl.sparkline(work) }}"></div>
 
     </div>

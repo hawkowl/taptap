@@ -129,6 +129,24 @@ class APIResource(object):
         return d
 
 
+    @app.route('/works/<int:id>/counts', methods=["POST"])
+    def works_counts_POST(self, request, id):
+
+        request.responseHeaders.addRawHeader("Content-Type", "application/json")
+        count = int(json.loads(request.content.getvalue().decode('utf8'))["count"])
+
+        d = User.load(self._cookies[request.getCookie(b"TAPTAP_TOKEN")])
+        d.addCallback(lambda user: user.load_work(id))
+
+        @d.addCallback
+        def _got_work(work):
+            work.counts.append(WordCount(at=math.floor(time.time()), count=count))
+            return work.save()
+
+        d.addCallback(lambda _: _make_json(APIWork.from_work(_)))
+        return d
+
+
 
 class LoginResource(object):
 

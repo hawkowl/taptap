@@ -31,3 +31,18 @@ angular.
             });
         }
     ]);
+
+
+angular.
+    module('core.work').
+    factory('WordCount', [
+        '$resource',
+        function($resource) {
+            return $resource('api/works/:workID/counts', {}, {
+                add: {
+                    method: 'POST',
+                    params: {workID: ''}
+                }
+            });
+        }
+    ]);
