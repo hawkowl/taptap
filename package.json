@@ -5,9 +5,12 @@
     "homepage": "https://github.com/angular/taptapstats",
     "license": "MIT",
     "private": true,
+    "dependencies": {
+        "bower": "1.8.x"
+    }
     "scripts": {
-        "postinstall": "bower install && virtualenv -p python3 --clear venv",
-        "prestart": "venv/bin/pip install -U .",
+        "postinstall": "bower install",
+        "prestart": "virtualenv -p python3 --clear venv && venv/bin/pip install -U .",
         "start": "venv/bin/twist taptap --endpoint=tcp:8080"
     }
 }
