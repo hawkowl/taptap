@@ -1,0 +1,6 @@
+#!/bin/bash
+
+npm install
+bower install
+python setup.py build_sass
+pip install -e .
