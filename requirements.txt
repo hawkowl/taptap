@@ -1,1 +1,8 @@
-twisted==16.6
+incremental
+twisted
+klein
+attrs
+cattrs
+treq
+alchimia
+psycopg2
