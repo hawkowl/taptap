@@ -178,12 +178,14 @@ class LoginResource(object):
                 proto = "http"
 
             web_path = request.getRequestHostname().decode('ascii') + port
+
+            target_url = urlunparse([
+                proto, web_path,
+                "/login/done", '', '', ''])
         else:
             web_path = os.environ["WEB_PATH"]
+            target_url = web_path + "/login/done"
 
-        target_url = urlunparse([
-            proto, web_path,
-            "/login/done", '', '', ''])
 
         d = get_request_token(self.consumer_key, self.consumer_secret,
                               target_url)
