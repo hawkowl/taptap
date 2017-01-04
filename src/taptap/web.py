@@ -167,16 +167,22 @@ class LoginResource(object):
     @app.route("/go")
     def go(self, request):
 
-        if request.getHost().port not in [80, 443]:
-            port = ":" + str(request.getHost().port)
+        if not os.environ.get("WEB_PATH"):
 
-        if request.getHost().port == 443:
-            proto = "https"
+            if request.getHost().port not in [80, 443]:
+                port = ":" + str(request.getHost().port)
+
+            if request.getHost().port == 443:
+                proto = "https"
+            else:
+                proto = "http"
+
+            web_path = request.getRequestHostname().decode('ascii') + port
         else:
-            proto = "http"
+            web_path = os.environ["WEB_PATH"]
 
         target_url = urlunparse([
-            proto, request.getRequestHostname().decode('ascii') + port,
+            proto, web_path,
             "/login/done", '', '', ''])
 
         d = get_request_token(self.consumer_key, self.consumer_secret,
