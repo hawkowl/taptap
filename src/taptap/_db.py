@@ -1,3 +1,4 @@
+import os
 from alchimia import TWISTED_STRATEGY
 
 from sqlalchemy import create_engine, MetaData
@@ -18,7 +19,7 @@ def get_engine():
     global _engine
     if _engine is None:
         _engine = create_engine(
-            "postgresql+psycopg2://taptap@localhost/taptap", reactor=reactor, strategy=TWISTED_STRATEGY,
+            os.environ["DATABASE_URL"], reactor=reactor, strategy=TWISTED_STRATEGY,
         )
 
     return _engine

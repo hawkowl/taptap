@@ -154,8 +154,14 @@ class LoginResource(object):
     tokens = {}
 
     def __init__(self, cookie_store):
-        secrets = json.loads(FilePath("secrets.json").getContent().decode('utf8'))
-        self.consumer_key, self.consumer_secret = secrets["key"], secrets["secret"]
+        if FilePath("secrets.json").exists():
+
+            secrets = json.loads(FilePath("secrets.json").getContent().decode('utf8'))
+            self.consumer_key, self.consumer_secret = secrets["key"], secrets["secret"]
+        else:
+            self.consumer_key = os.environ["TWITTER_KEY"]
+            self.consumer_secret = os.environ["TWITTER_SECRET"]
+
         self._cookies = cookie_store
 
     @app.route("/go")
