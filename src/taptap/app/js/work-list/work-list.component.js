@@ -38,7 +38,6 @@ angular.
                     }
 
                     return done.join(",")
-
                 }
             }
         ]

@@ -25,11 +25,10 @@ def get_engine():
     return _engine
 
 
-
-
 user_table = Table("users", metadata,
                    Column("id", Integer(), primary_key=True),
                    Column("name", String()),
+                   Column("tzoffset", Integer()),
 )
 
 cookie_table = Table("cookies", metadata,
