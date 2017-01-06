@@ -148,12 +148,62 @@ class APIResource(object):
             if values:
                 diff = mx - values[-1]
             else:
-                diff = 0
+                diff = mx
             diffs.append(diff)
             values.append(max(v))
 
-        return json.dumps({"x": times, "y": values, "diffs": diffs},
-                          separators=(',',':')).encode('utf8')
+        dates = {}
+
+        for x in range(len(times)):
+            dates[times[x]] = {
+                "diff": diffs[x],
+                "value": values[x]}
+
+        best_day = max(diffs)
+        best_days = [x for x, y in dates.items() if y["diff"] == best_day]
+
+        if work.completed:
+            start = (datetime.datetime.utcfromtimestamp(work.counts[0].at) -
+                     datetime.timedelta(seconds=user.tzoffset))
+            end = (datetime.datetime.utcfromtimestamp(work.counts[-1].at) -
+                   datetime.timedelta(seconds=user.tzoffset))
+            days = (end - start).days + 1
+        else:
+            start = (datetime.datetime.utcfromtimestamp(work.counts[0].at) -
+                     datetime.timedelta(seconds=user.tzoffset))
+            end = (datetime.datetime.now() -
+                   datetime.timedelta(seconds=user.tzoffset))
+            days = (end - start).days + 1
+
+        until_target = work.word_target - values[-1]
+        words_per_day = values[-1] // days
+        words_per_writing_day = values[-1] // len(values)
+        writing_days_until_target = math.ceil(until_target / words_per_writing_day)
+
+        finished_at_pace = ((datetime.datetime.now() - datetime.timedelta(seconds=user.tzoffset)) + datetime.timedelta(days=math.ceil(until_target / words_per_day))).strftime("%Y-%m-%d")
+
+        if not work.completed:
+            dat = (datetime.datetime.now() -
+                   datetime.timedelta(seconds=user.tzoffset)).strftime("%Y-%m-%d")
+
+            if dat not in times:
+                times.append(dat)
+                values.append(values[-1])
+                diffs.append(0)
+
+        return json.dumps({
+            "x": times,
+            "y": values,
+            "diffs": diffs,
+            "stats": {
+                "best_day": "{} ({} words)".format(",".join(best_days), best_day),
+                "until_target": until_target,
+                "words_per_day": words_per_day,
+                "words_per_writing_day": words_per_writing_day,
+                "writing_days_until_target": writing_days_until_target,
+                "finished_at_pace": finished_at_pace
+            }
+        },separators=(',',':')).encode('utf8')
 
 
 class LoginResource(object):

@@ -19,14 +19,71 @@
 
   <div class="row">
 
-    <div class="col-sm-6">
+    <div class="col-sm-7">
 
       <div id="graph" style="width: 100%; height: 500px"></div>
 
     </div>
-    <div class="col-sm-6">
+    <div class="col-sm-5">
 
-      Best day:
+      <div class="container-fluid stat-box">
+
+
+        <div class="row">
+          <div class="col-sm-8 stat-title">
+            Words until Target
+          </div>
+          <div class="col-sm-4 stat-value">
+            {{ dailies.stats.until_target }}
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-sm-8 stat-title">
+            Best day:
+          </div>
+          <div class="col-sm-4 stat-value">
+            {{ dailies.stats.best_day }}
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-sm-8 stat-title">
+            Words per Day
+          </div>
+          <div class="col-sm-4 stat-value">
+            {{ dailies.stats.words_per_day }}
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-sm-8 stat-title">
+            Words per Writing Day
+          </div>
+          <div class="col-sm-4 stat-value">
+            {{ dailies.stats.words_per_writing_day }}
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-sm-8 stat-title">
+            Writing Days to hit Target
+          </div>
+          <div class="col-sm-4 stat-value">
+            {{ dailies.stats.writing_days_until_target }}
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-sm-8 stat-title">
+            At this pace, you'll finish on
+          </div>
+          <div class="col-sm-4 stat-value">
+            {{ dailies.stats.finished_at_pace }}
+          </div>
+        </div>
+
+      </div>
 
     </div>
 

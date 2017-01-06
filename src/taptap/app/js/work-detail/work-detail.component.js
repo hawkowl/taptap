@@ -13,21 +13,22 @@ angular.
 
                 $this.regraph = function() {
                     DailyCounts.query({workID: $routeParams.workID}).$promise.then(function(result) {
-
                         $scope.dailies = result
-                        result.x.unshift("2017-01-01")
+
+                        result.x.unshift(result.x[0])
                         result.y.unshift(0)
 
-                        var x = {}
-                        x.x = result.x
-                        x.y = result.y
-                        x.type = 'scatter'
-                        x.line = {
-                            shape: "hv"
+                        var x = {
+                            x: result.x,
+                            y: result.y,
+                            type: 'scatter',
+                            line: {
+                                shape: "hv"
+                            }
                         }
-                        console.log(x)
 
                         var layout = {
+                            title: "Historical Progress on " + $scope.work.name,
                             xaxis: {
                                 type: 'date',
                                 title: 'Date',
@@ -39,9 +40,7 @@ angular.
                         }
 
                         Plotly.newPlot('graph', [x], layout)
-
                     })
-
                 }
 
                 $this.regraph()
@@ -52,7 +51,7 @@ angular.
                         function(work) {
                             $scope.work = work;
                             $('#wordcount_modal').modal('hide');
-                            $this.regraph
+                            $this.regraph()
                         })
                 }
 
