@@ -46,3 +46,18 @@ angular.
             });
         }
     ]);
+
+
+angular.
+    module('core.work').
+    factory('DailyCounts', [
+        '$resource',
+        function($resource) {
+            return $resource('api/works/:workID/daily', {}, {
+                query: {
+                    method: 'GET',
+                    params: {workID: ''}
+                }
+            });
+        }
+    ]);

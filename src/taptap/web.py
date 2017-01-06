@@ -4,6 +4,7 @@ import json
 import os
 import time
 import math
+import datetime
 
 from base64 import b64encode
 
@@ -73,7 +74,6 @@ class APIResource(object):
 
     @app.route('/user', methods=['GET'])
     async def user_GET(self, request):
-
         request.responseHeaders.addRawHeader("Content-Type", "application/json")
 
         user = await User.load(self._cookies[request.getCookie(b"TAPTAP_TOKEN")])
@@ -113,18 +113,47 @@ class APIResource(object):
 
     @app.route('/works/<int:id>/counts', methods=["POST"])
     async def works_counts_POST(self, request, id):
-
         request.responseHeaders.addRawHeader("Content-Type", "application/json")
-        count = int(json.loads(request.content.getvalue().decode('utf8'))["count"])
 
+        count = int(json.loads(request.content.getvalue().decode('utf8'))["count"])
         user = await User.load(self._cookies[request.getCookie(b"TAPTAP_TOKEN")])
         work = await user.load_work(id)
 
         work.counts.append(WordCount(at=math.floor(time.time()), count=count))
         await work.save()
 
-        return _make_json(APIWork.from_work(_))
+        return _make_json(APIWork.from_work(work))
 
+    @app.route('/works/<int:id>/daily', methods=["GET"])
+    async def works_daily_GET(self, request, id):
+        request.responseHeaders.addRawHeader("Content-Type", "application/json")
+
+        user = await User.load(self._cookies[request.getCookie(b"TAPTAP_TOKEN")])
+        work = await user.load_work(id)
+        counts = {}
+
+        for count in work.counts:
+            dt = (datetime.datetime.utcfromtimestamp(count.at) -
+                  datetime.timedelta(seconds=user.tzoffset))
+            time = dt.strftime("%Y-%m-%d")
+            ct = counts.get(time, [])
+            ct.append(count.count)
+            counts[time] = ct
+
+        times, values, diffs = [], [], []
+
+        for t, v in counts.items():
+            times.append(t)
+            mx = max(v)
+            if values:
+                diff = mx - values[-1]
+            else:
+                diff = 0
+            diffs.append(diff)
+            values.append(max(v))
+
+        return json.dumps({"x": times, "y": values, "diffs": diffs},
+                          separators=(',',':')).encode('utf8')
 
 
 class LoginResource(object):

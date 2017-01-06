@@ -16,50 +16,42 @@ class WordCount(object):
     at = attr.ib(validator=instance_of(int))
     count = attr.ib(validator=instance_of(int))
 
-    def save_for(self, id, engine=None):
+    async def save_for(self, id, engine=None):
 
         if not engine:
             engine = get_engine()
 
-        async def _():
+        values = {
+            "at": self.at,
+            "count": self.count,
+            "work": id
+        }
 
-            values = {
-                "at": self.at,
-                "count": self.count,
-                "work": id
-            }
+        try:
+            engine.execute(counts_table.insert().values(**values))
+        except:
+            pass
 
-            try:
-                engine.execute(counts_table.insert().values(**values))
-            except:
-                pass
-
-            return self
-
-        return ensureDeferred(_())
+        return self
 
     @classmethod
-    def load_for(cls, for_id, engine=None):
+    async def load_for(cls, for_id, engine=None):
 
         if not engine:
             engine = get_engine()
 
-        async def _():
+        f = await engine.execute(counts_table.select().
+                                 where(counts_table.c.work == for_id))
+        result = await f.fetchall()
+        results = []
 
-            f = await engine.execute(counts_table.select().
-                                     where(counts_table.c.work == for_id))
-            result = await f.fetchall()
+        for count in result:
+            results.append(cls(
+                at=count[counts_table.c.at],
+                count=count[counts_table.c.count]))
 
-            results = []
+        return results
 
-            for count in result:
-                results.append(cls(
-                    at=count[counts_table.c.at],
-                    count=count[counts_table.c.count]))
-
-            return results
-
-        return ensureDeferred(_())
 
 @attr.s
 class Work(object):
@@ -86,51 +78,44 @@ class Work(object):
         )
 
     @classmethod
-    def load(cls, id, engine=None):
+    async def load(cls, id, engine=None):
 
         if not engine:
             engine = get_engine()
 
-        async def _():
+        f = await engine.execute(work_table.select().
+                                 where(work_table.c.id == id))
+        result = await f.fetchone()
+        return await self._load_from_data(result, engine)
 
-            f = await engine.execute(work_table.select().
-                                     where(work_table.c.id == id))
-            result = await f.fetchone()
 
-            return self._load_from_data(result, engine)
-
-        return ensureDeferred(_())
-
-    def save(self, engine=None):
+    async def save(self, engine=None):
 
         if not engine:
             engine = get_engine()
 
-        async def _():
+        values = {
+            "name": self.name,
+            "word_target": self.word_target,
+            "completed": self.completed,
+            "user": self.user,
+        }
 
-            values = {
-                "name": self.name,
-                "word_target": self.word_target,
-                "completed": self.completed,
-                "user": self.user,
-            }
+        if self.id:
+            values["id"] = self.id
+            await engine.execute(work_table.update().
+                                 where(work_table.c.id == self.id).
+                                 values(**values))
 
-            if self.id:
-                values["id"] = self.id
-                await engine.execute(work_table.update().
-                                     where(work_table.c.id == self.id).
-                                     values(**values))
+        else:
+            res = await engine.execute(work_table.insert().values(**values))
+            self.id = res.inserted_primary_key[0]
 
-            else:
-                res = await engine.execute(work_table.insert().values(**values))
-                self.id = res.inserted_primary_key[0]
+        for count in self.counts:
+            await count.save_for(self.id)
 
-            for count in self.counts:
-                await count.save_for(self.id)
+        return self
 
-            return self
-
-        return ensureDeferred(_())
 
 
 def dump_works(works):
