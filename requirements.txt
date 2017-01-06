@@ -2,7 +2,7 @@ cryptography
 libsass
 incremental
 twisted
-klein
+https://github.com/twisted/klein/archive/master.zip
 attrs
 cattrs
 treq

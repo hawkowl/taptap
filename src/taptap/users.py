@@ -22,148 +22,123 @@ quote = lambda x: _quote(x, safe='')
 class User(object):
     id = attr.ib(validator=instance_of(int))
     name = attr.ib(validator=instance_of(str))
+    tzoffset = attr.ib(validator=instance_of(int))
 
     @classmethod
-    def load(cls, id, engine=None):
+    async def load(cls, id, engine=None):
+        if not engine:
+            engine = get_engine()
+
+        e = await engine.connect()
+
+        f = await e.execute(user_table.select().
+                            where(user_table.c.id == id))
+        result = await f.fetchone()
+
+        await e.close()
+        return cls(
+            id=result[user_table.c.id],
+            name=result[user_table.c.name],
+            tzoffset=result[user_table.c.tzoffset])
+
+    async def save(self, engine=None):
+        if not engine:
+            engine = get_engine()
+
+        e = await engine.connect()
+
+        try:
+            await e.execute(user_table.insert().values(
+                id=self.id,
+                name=self.name,
+                tzoffset=self.tzoffset))
+        except Exception as exc:
+            await e.execute(user_table.update().
+                            where(user_table.c.id == self.id).
+                            values(name=self.name,
+                                   tzoffset=self.tzoffset))
+
+        await e.close()
+        return self
+
+    async def load_work(self, id, engine=None):
+        from .work import Work
 
         if not engine:
             engine = get_engine()
 
-        async def _():
+        e = await engine.connect()
 
-            e = await engine.connect()
+        r = await e.execute(work_table.select().where(
+            work_table.c.user == self.id).where(work_table.c.id == id))
 
-            f = await e.execute(user_table.select().
-                                where(user_table.c.id == id))
-            result = await f.fetchone()
+        result = await r.fetchone()
+        loaded = await Work._load_from_data(result, engine)
 
-            await e.close()
-            return cls(
-                id=result[user_table.c.id],
-                name=result[user_table.c.name])
+        await e.close()
+        return loaded
 
-        return ensureDeferred(_())
-
-    def save(self, engine=None):
-
-        if not engine:
-            engine = get_engine()
-
-        async def _():
-
-            e = await engine.connect()
-
-            try:
-                await e.execute(user_table.insert().values(
-                    id=self.id,
-                    name=self.name))
-            except Exception as exc:
-                await e.execute(user_table.update().
-                                where(user_table.c.id == self.id).
-                                values(name=self.name))
-
-            await e.close()
-            return self
-
-        return ensureDeferred(_())
-
-    def load_work(self, id, engine=None):
+    async def load_works(self, engine=None):
 
         from .work import Work
 
         if not engine:
             engine = get_engine()
 
-        async def _():
+        e = await engine.connect()
 
-            e = await engine.connect()
+        r = await e.execute(work_table.select().where(work_table.c.user == self.id))
 
-            r = await e.execute(work_table.select().where(
-                work_table.c.user == self.id and work_table.c.id == id))
+        results = await r.fetchall()
 
-            result = await r.fetchone()
-            loaded = await Work._load_from_data(result, engine)
+        done_results = []
 
-            await e.close()
-            return loaded
+        for result in results:
+            done_results.append(await Work._load_from_data(result, e))
 
-        return ensureDeferred(_())
+        await e.close()
 
-    def load_works(self, engine=None):
-
-        from .work import Work
-
-        if not engine:
-            engine = get_engine()
-
-        async def _():
-
-            e = await engine.connect()
-
-            r = await e.execute(work_table.select().where(work_table.c.user == self.id))
-
-            results = await r.fetchall()
-
-            done_results = []
-
-            for result in results:
-                done_results.append(await Work._load_from_data(result, e))
-
-            await e.close()
-
-            return done_results
-
-        return ensureDeferred(_())
+        return done_results
 
 
-
-
-def add_cookie(cookie, id, time_to_expiry, engine=None):
+async def add_cookie(cookie, id, time_to_expiry, engine=None):
 
     if not engine:
         engine = get_engine()
 
-    async def _():
-        e = await engine.connect()
+    e = await engine.connect()
 
-        f = await e.execute(cookie_table.insert().values(
-            cookie=cookie.decode('utf8'),
-            id=id,
-            expires=time.time() + time_to_expiry
-        ))
+    f = await e.execute(cookie_table.insert().values(
+        cookie=cookie.decode('utf8'),
+        id=id,
+        expires=time.time() + time_to_expiry
+    ))
 
-        await e.close()
+    await e.close()
 
-        return f
-
-    return ensureDeferred(_())
+    return f
 
 
-def get_cookies(engine=None):
+async def get_cookies(engine=None):
 
     if not engine:
         engine = get_engine()
 
-    async def _():
+    e = await engine.connect()
 
-        e = await engine.connect()
+    await e.execute(cookie_table.delete().where(
+        cookie_table.c.expires < time.time()))
 
-        await e.execute(cookie_table.delete().where(
-            cookie_table.c.expires < time.time()))
+    f = await e.execute(cookie_table.select())
 
-        f = await e.execute(cookie_table.select())
+    cookies = await f.fetchall()
+    cookiedict = {}
 
-        cookies = await f.fetchall()
-        cookiedict = {}
+    for cookie in cookies:
+        cookiedict[cookie.cookie.encode('utf8')] = cookie.id
 
-        for cookie in cookies:
-            cookiedict[cookie.cookie.encode('utf8')] = cookie.id
-
-        await e.close()
-        return cookiedict
-
-    return ensureDeferred(_())
-
+    await e.close()
+    return cookiedict
 
 
 def get_nonce():
