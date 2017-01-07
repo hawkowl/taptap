@@ -287,13 +287,13 @@ class LoginResource(object):
 
         key = _make_cookie_key()
 
-        await add_cookie(key, u.id, 25200)
+        await add_cookie(key, u.id, 604800)
         cookies = await get_cookies()
         self._cookies.clear()
         self._cookies.update(cookies)
 
         request.addCookie("TAPTAP_TOKEN", key, path="/",
-                          max_age=25200, httpOnly=True)
+                          max_age=604800, httpOnly=True)
 
         request.redirect("/")
         return b''
