@@ -28,7 +28,7 @@ angular.
                         }
 
                         var layout = {
-                            title: "Historical Progress on " + $scope.work.name,
+                            title: "Historical Progress on " + $scope.work.name + " (Daily Highest)",
                             xaxis: {
                                 type: 'date',
                                 title: 'Date',
@@ -46,7 +46,8 @@ angular.
                 $this.regraph()
 
                 $scope.update = function() {
-                    var input = {"count": $("#wc_number").val()};
+                    var input = {"count": $("#wc_number").val(),
+                                 "target": $("#wc_target").val()};
                     WordCount.add({workID: $routeParams.workID}, input).$promise.then(
                         function(work) {
                             $scope.work = work;

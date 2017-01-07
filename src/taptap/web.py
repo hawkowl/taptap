@@ -115,11 +115,15 @@ class APIResource(object):
     async def works_counts_POST(self, request, id):
         request.responseHeaders.addRawHeader("Content-Type", "application/json")
 
-        count = int(json.loads(request.content.getvalue().decode('utf8'))["count"])
+        body = json.loads(request.content.getvalue().decode('utf8'))
+        count = int(body["count"])
+        target = int(body["target"])
         user = await User.load(self._cookies[request.getCookie(b"TAPTAP_TOKEN")])
         work = await user.load_work(id)
 
-        work.counts.append(WordCount(at=math.floor(time.time()), count=count))
+        work.word_target = target
+        if work.counts[-1].count != count:
+            work.counts.append(WordCount(at=math.floor(time.time()), count=count))
         await work.save()
 
         return _make_json(APIWork.from_work(work))
@@ -133,7 +137,7 @@ class APIResource(object):
         counts = {}
 
         for count in work.counts:
-            dt = (datetime.datetime.utcfromtimestamp(count.at) -
+            dt = (datetime.datetime.utcfromtimestamp(count.at) +
                   datetime.timedelta(seconds=user.tzoffset))
             time = dt.strftime("%Y-%m-%d")
             ct = counts.get(time, [])
@@ -143,7 +147,6 @@ class APIResource(object):
         times, values, diffs = [], [], []
 
         for t, v in counts.items():
-            times.append(t)
             mx = max(v)
             if values:
                 diff = mx - values[-1]
@@ -163,13 +166,13 @@ class APIResource(object):
         best_days = [x for x, y in dates.items() if y["diff"] == best_day]
 
         if work.completed:
-            start = (datetime.datetime.utcfromtimestamp(work.counts[0].at) -
+            start = (datetime.datetime.utcfromtimestamp(work.counts[0].at) +
                      datetime.timedelta(seconds=user.tzoffset))
-            end = (datetime.datetime.utcfromtimestamp(work.counts[-1].at) -
+            end = (datetime.datetime.utcfromtimestamp(work.counts[-1].at) +
                    datetime.timedelta(seconds=user.tzoffset))
             days = (end - start).days + 1
         else:
-            start = (datetime.datetime.utcfromtimestamp(work.counts[0].at) -
+            start = (datetime.datetime.utcfromtimestamp(work.counts[0].at) +
                      datetime.timedelta(seconds=user.tzoffset))
             end = (datetime.datetime.now() -
                    datetime.timedelta(seconds=user.tzoffset))
@@ -194,7 +197,6 @@ class APIResource(object):
         return json.dumps({
             "x": times,
             "y": values,
-            "diffs": diffs,
             "stats": {
                 "best_day": "{} ({} words)".format(",".join(best_days), best_day),
                 "until_target": until_target,

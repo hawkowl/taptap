@@ -102,10 +102,10 @@
           </div>
           <div class="modal-body">
             <div>
-              <textarea id="wc_input"></textarea>
+              <textarea id="wc_input" placeholder="Paste your work here, and we'll calculate the word count! (We don't save what you paste, though.)"></textarea>
             </div>
             <div>
-              <label>Words: <input type="number" id="wc_number" value="{{ work.word_count }}"></label>
+              <label>Words: <input type="number" id="wc_number" value="{{ work.word_count }}"></label> <label>of <input type="number" id="wc_target" value="{{ work.word_target }}"></label>
             </div>
           </div>
           <div class="modal-footer">
