@@ -164,6 +164,7 @@ class APIResource(object):
 
         best_day = max(diffs)
         best_days = [x for x, y in dates.items() if y["diff"] == best_day]
+        until_target = work.word_target - values[-1]
 
         if work.completed:
             start = (datetime.datetime.utcfromtimestamp(work.counts[0].at) +
@@ -174,16 +175,20 @@ class APIResource(object):
         else:
             start = (datetime.datetime.utcfromtimestamp(work.counts[0].at) +
                      datetime.timedelta(seconds=user.tzoffset))
-            end = (datetime.datetime.now() -
+            end = (datetime.datetime.now() +
                    datetime.timedelta(seconds=user.tzoffset))
             days = (end - start).days + 1
 
-        until_target = work.word_target - values[-1]
-        words_per_day = values[-1] // days
-        words_per_writing_day = values[-1] // len(values)
-        writing_days_until_target = math.ceil(until_target / words_per_writing_day)
+        words_per_day = values[-1] // days if values[-1] else 0
+        words_per_writing_day = values[-1] // len(values) if len(values) else 0
 
-        finished_at_pace = ((datetime.datetime.now() - datetime.timedelta(seconds=user.tzoffset)) + datetime.timedelta(days=math.ceil(until_target / words_per_day))).strftime("%Y-%m-%d")
+        if work.completed:
+            writing_days_until_target = "N/A"
+            finished_at_pace = "N/A"
+
+        else:
+            writing_days_until_target = math.ceil(until_target / words_per_writing_day) if until_target != 0 and words_per_writing_day != 0 else "∞"
+            finished_at_pace = ((datetime.datetime.now() - datetime.timedelta(seconds=user.tzoffset)) + datetime.timedelta(days=math.ceil(until_target / words_per_day))).strftime("%Y-%m-%d") if until_target != 0 and words_per_day != 0 else "∞"
 
         if not work.completed:
             dat = (datetime.datetime.now() -
@@ -205,7 +210,7 @@ class APIResource(object):
                 "writing_days_until_target": writing_days_until_target,
                 "finished_at_pace": finished_at_pace
             }
-        },separators=(',',':')).encode('utf8')
+        }, separators=(',',':')).encode('utf8')
 
 
 class LoginResource(object):
@@ -297,7 +302,7 @@ class LoginResource(object):
 class LoginRedirectResource(Resource):
     isLeaf = True
 
-    def render_GET(self, request):
+    def render(self, request):
         return b'<meta http-equiv="refresh" content="0; url=/login/go" />'
 
 

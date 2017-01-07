@@ -17,6 +17,7 @@ class TapTapService(service.Service):
 
         resource = CoreResource(FilePath(__file__).sibling('app').path)
         site = Site(resource)
+        site.displayTracebacks = False
         endpoint = serverFromString(reactor, self._endpoint)
         return endpoint.listen(site)
 
