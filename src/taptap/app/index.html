@@ -43,17 +43,11 @@
 
     <div class="container-fluid nav-top blackbg">
       <div class="container">
-        <nav class="navbar navbar-dark bg-inverse siteheader">
+        <nav class="navbar navbar-toggleable-md navbar-dark siteheader">
           <a class="navbar-brand" href="#">TapTap</a>
-
-          <ul class="nav navbar-nav float-xs-right">
-
-            <li class="nav-item">
-              <a class="nav-link" href="#" ng-controller="userController">{{ user.name }}</a>
-            </li>
-
-          </ul>
-
+          <div class="collapse navbar-collapse">
+            <a class="navbar-text ml-auto" href="#" ng-controller="userController">{{ user.name }}</a>
+          </div>
         </nav>
       </div>
     </div>
