@@ -56,6 +56,17 @@ angular.
                         })
                 }
 
+                $scope.update_detail = function() {
+                    var input = {"name": $("#detail_name").val(),
+                                 "completed": $("#detail_completed").is(":checked")};
+                    Work.update({workID: $routeParams.workID}, input).$promise.then(
+                        function(work) {
+                            $scope.work = work;
+                            $('#detail_modal').modal('hide');
+                            $this.regraph()
+                        })
+                }
+
             }
         ]
     });

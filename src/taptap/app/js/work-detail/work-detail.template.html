@@ -9,6 +9,9 @@
         {{ work.word_count }}/{{ work.word_target }} words ({{ work.word_count | words_to_time }})
       </span>
       <span>
+        <button type="button" class="btn btn-primary btn-sml" data-toggle="modal" data-target="#detail_modal">
+          Edit Details
+        </button>
         <button type="button" class="btn btn-primary btn-sml" data-toggle="modal" data-target="#wordcount_modal">
           Update Count
         </button>
@@ -132,5 +135,38 @@
 
   </script>
 
+  <form novalidate>
+    <!-- Modal -->
+    <div class="modal fade" id="detail_modal" tabindex="-1" role="dialog" aria-labelledby="detailModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+            <h4 class="modal-title" id="detailModalLabel">Update details</h4>
+          </div>
+          <div class="modal-body">
+            <div>
+              <label>Name: <input type="text" id="detail_name" value="{{ work.name }}"></label></label>
+            </div>
+            <div>
+              <label>Completed: <input type="checkbox" ngModel="work.completed" id="detail_completed"></label></label>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <input type="submit" class="btn btn-primary" ng-click="update_detail()" value="Save">
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+
+  <script>
+    $('#detail_modal').on('shown.bs.modal', function () {
+      $('#detail_name').focus();
+    });
+  </script>
 
 </div>

@@ -27,6 +27,10 @@ angular.
                     method: 'GET',
                     params: {workID: ''},
                     isArray: true
+                },
+                update: {
+                    method: 'POST',
+                    params: {workID: ''}
                 }
             });
         }

@@ -111,6 +111,24 @@ class APIResource(object):
         return _make_json(APIWork.from_work(work))
 
 
+    @app.route('/works/<int:id>', methods=["POST"])
+    async def works_item_POST(self, request, id):
+        request.responseHeaders.addRawHeader("Content-Type", "application/json")
+
+        user = await User.load(self._cookies[request.getCookie(b"TAPTAP_TOKEN")])
+        work = await user.load_work(id)
+
+        body = json.loads(request.content.getvalue().decode('utf8'))
+        name = body["name"]
+        completed = body["completed"]
+
+        work.name = name
+        work.completed = completed
+        await work.save()
+
+        return _make_json(APIWork.from_work(work))
+
+
     @app.route('/works/<int:id>/counts', methods=["POST"])
     async def works_counts_POST(self, request, id):
         request.responseHeaders.addRawHeader("Content-Type", "application/json")
@@ -154,6 +172,7 @@ class APIResource(object):
                 diff = mx
             diffs.append(diff)
             values.append(max(v))
+            times.append(t)
 
         dates = {}
 
