@@ -3,7 +3,8 @@ from alchimia import TWISTED_STRATEGY
 
 from sqlalchemy import create_engine, MetaData
 from sqlalchemy import (
-    Table, Column, Integer, String, ForeignKey, Boolean, UniqueConstraint
+    Table, Column, Integer, BigInteger, String, ForeignKey, Boolean,
+    UniqueConstraint
 )
 from sqlalchemy.schema import CreateTable
 
@@ -26,20 +27,20 @@ def get_engine():
 
 
 user_table = Table("users", metadata,
-                   Column("id", Integer(), primary_key=True),
+                   Column("id", BigInteger(), primary_key=True),
                    Column("name", String()),
                    Column("tzoffset", Integer()),
 )
 
 cookie_table = Table("cookies", metadata,
                      Column("cookie", String(), primary_key=True),
-                     Column("id", Integer(), nullable=False),
+                     Column("id", BigInteger(), nullable=False),
                      Column("expires", Integer(), nullable=False),
 )
 
 work_table = Table("works", metadata,
                    Column("id", Integer(), primary_key=True),
-                   Column("user", Integer(), ForeignKey("users.id"), nullable=False),
+                   Column("user", BigInteger(), ForeignKey("users.id"), nullable=False),
                    Column("name", String(), nullable=False),
                    Column("word_target", Integer(), nullable=False),
                    Column("completed", Boolean(), nullable=False),
